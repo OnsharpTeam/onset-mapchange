@@ -1,0 +1,3 @@
+[submodule "cml/thirdparty/OnsetSDK"]
+	path = cml/thirdparty/OnsetSDK
+	url = https://github.com/BlueMountainsIO/OnsetSDK.git

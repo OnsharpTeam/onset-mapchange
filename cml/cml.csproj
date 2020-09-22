@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <RootNamespace>CustomMapsLoader</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Onsharp" Version="1.1.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="cml-extended, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\cml-extended\cml-extended\bin\Debug\netcoreapp3.1\cml-extended.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>
