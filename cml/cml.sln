@@ -1,6 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cml", "cml.csproj", "{EBBE446D-B59B-49D0-AF4E-12CA6D4F1A7C}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cml", "cml.csproj", "{EBBE446D-B59B-49D0-AF4E-12CA6D4F1A7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cml-changer", "..\cml-changer\cml-changer.csproj", "{09B7A67A-CA8A-4865-B9AA-5BB28743A95D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +17,15 @@ Global
 		{EBBE446D-B59B-49D0-AF4E-12CA6D4F1A7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBBE446D-B59B-49D0-AF4E-12CA6D4F1A7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBBE446D-B59B-49D0-AF4E-12CA6D4F1A7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09B7A67A-CA8A-4865-B9AA-5BB28743A95D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09B7A67A-CA8A-4865-B9AA-5BB28743A95D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09B7A67A-CA8A-4865-B9AA-5BB28743A95D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09B7A67A-CA8A-4865-B9AA-5BB28743A95D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {09DC0677-76AC-401E-B089-AB97237FB72E}
 	EndGlobalSection
 EndGlobal

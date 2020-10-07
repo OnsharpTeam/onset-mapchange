@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <script>
+        (function (obj) {
+            ue.game = {};
+            ue.game.callevent = function (name, ...args) {
+                if (typeof name != "string") {
+                    return;
+                }
+
+                if (args.length == 0) {
+                    obj.callevent(name, "")
+                } else {
+                    let params = []
+                    for (let i = 0; i < args.length; i++) {
+                        params[i] = args[i];
+                    }
+                    obj.callevent(name, JSON.stringify(params));
+                }
+            };
+        })(ue.game);
+        CallEvent = ue.game.callevent;
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CMC Selector</title>
+    <script src="jquery.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans&display=swap');
+        
+        html, body {
+            overflow: hidden;
+        }
+        
+        #wrapper {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.7);
+            font-family: 'Kumbh Sans', sans-serif;
+            color: white;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        #title {
+            text-align: center;
+            font-size: 35px;
+            font-weight: bold;
+        }
+        
+        #subtitle {
+            text-align: center;
+            font-style: italic;
+            font-size: 20px;
+        }
+        
+        #titles {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #maps {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        #valign {
+            height: 100%;
+            width: 100%;
+        }
+        
+        #valign.center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .map {
+            width: 340px;
+            min-height: 250px;
+            cursor: pointer;
+            background-color: whitesmoke;
+            border-radius: 25px;
+            -webkit-box-shadow: 0px 0px 11px 0px rgba(0,0,0,0.75);
+            -moz-box-shadow: 0px 0px 11px 0px rgba(0,0,0,0.75);
+            box-shadow: 0px 0px 11px 0px rgba(0,0,0,0.75);
+            margin: 10px;
+            user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .map .winner {
+            border: 2px solid lawngreen;
+        }
+        
+        .map .title {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            vertical-align: center;
+            text-align: center;
+            color: black;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .map .preview {
+            width: 285px;
+            height: 170px;            
+            margin: 0 auto;
+            background-image: url("https://www.thermaxglobal.com/wp-content/uploads/2020/05/image-not-found.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .map .votes {
+            width: 300px;
+            margin-left: 27px;
+            display: flex;
+            flex-wrap: wrap;
+            padding-bottom: 5px;
+            padding-top: 5px;
+        }
+        
+        .map .votes .vote {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="valign">
+        <div class="child">
+            <div id="titles">
+                <div id="title"></div>
+                <div id="subtitle"></div>
+            </div>
+            <div id="maps">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let playerCaches = {};
+    
+    function resetPlayerCache() {
+        playerCaches = {};
+    }
+    
+    function getPlayerData(steamId) {
+        steamId = steamId.toString();
+        if(!playerCaches[steamId]) {
+            $.ajax({
+                url : `https://cp.eternitylife.de/steamdata.php?steamid=${steamId}`,
+                type : "get",
+                async: false,
+                dataType: "json",
+                success : function(data) {
+                    if(data["response"]) {
+                        if(data["response"]["players"].length > 0) {
+                            let player = data["response"]["players"][0];
+                            playerCaches[steamId] = {
+                                avatar: player["avatar"],
+                                name: player["personaname"]
+                            }
+                        }
+                    }
+                },
+                error: function() {
+                }
+            });
+        }
+        return playerCaches[steamId];
+    }
+</script>
+<script>
+    const TITLE = "Map Voting";
+    document.getElementById('title').innerHTML = TITLE;
+    
+    const SUBTITLE = "The Vote for the next Map ends in {SECS} seconds...";
+    const SUBTITLE_ITEM = document.getElementById('subtitle');
+    
+    let VOTE_COUNTDOWN = 15;
+    let countdownSeconds = VOTE_COUNTDOWN;
+    let countdown;
+    let playersVote = {};
+    
+    function setCountdownSeconds(seconds) {
+        SUBTITLE_ITEM.innerHTML = SUBTITLE.replace("{SECS}", seconds);
+    }
+    
+    function voteForMap(name) {
+        CallEvent("cmc:web:vote", name);
+    }
+    
+    function selectMap(mapName) {
+        $('#map-' + mapName).addClass('winner');
+    }
+    
+    function startCountdown(seconds, mapsJson) {
+        resetPlayerCache();
+        playersVote = {};
+        let mapList = JSON.parse(mapsJson);
+        let maps = $('#maps');
+        maps.html("");
+        for(let i = 0; i < mapList.length; i++) {
+            let map = mapList[i];
+            let votes = "";
+            for(let j = 0; j < map.votes.length; j++) {
+                let vote = getPlayerData(map.votes[j]);
+                votes += `<div class="vote" title="${vote.name}" style="background-image: url('${vote.avatar}')"></div>`
+            }
+            maps.append(`<div class="map" onclick="voteForMap('${map.i}')" id="map-${map.i}">
+                    <div class="title">
+                        ${map.i}
+                    </div>
+                    <div class="preview" style="background-image: url('${map.p}')">
+                    </div>
+                    <div class="votes" id="votes-${map.i}">
+                          ${votes}
+                    </div>
+                </div>`);
+        }
+        let valign = $('#valign');
+        valign.addClass('center');
+        if(maps.height() > valign.height())
+            valign.removeClass('center');
+        countdownSeconds = seconds;
+        setCountdownSeconds(countdownSeconds);
+        countdown = setInterval(() => {
+            countdownSeconds--;
+            setCountdownSeconds(countdownSeconds);
+            if(countdownSeconds <= 0) {
+                clearInterval(countdown);
+                //CallEvent("cmc:web:close");
+            }
+        }, 1000);
+    }
+    
+    function setVote(steamId, map) {
+        if(playersVote[steamId]) {
+            playersVote[steamId]();
+        }
+        let q = $('#votes-' + map);
+        let vote = getPlayerData(steamId);
+        q.append(`<div id="vote-${steamId}" class="vote" title="${vote.name}" style="background-image: url('${vote.avatar}')"></div>`);
+        playersVote[steamId] = () => {
+              q.remove();
+        };
+    }
+    
+    function fillTest(len) {
+        let testMaps = [];
+        for(let i = 0; i < len; i++)
+            testMaps[i] = {
+                i: "Office2",
+                votes: ["76561198056610149"]
+            };
+        startCountdown(JSON.stringify(testMaps));
+    }
+    
+    fillTest(6);
+</script>
+</body>
+</html>

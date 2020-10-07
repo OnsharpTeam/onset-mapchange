@@ -34,9 +34,20 @@ namespace CustomMapsLoader
             _packagesFolder = packagesFolder;
             _mapsFolder = mapsFolder;
             Directory.CreateDirectory(_mapsFolder);
+            if (CML.Instance.Config.AutoCreateOnStartup)
+            {
+                foreach (string path in Directory.GetFiles(_mapsFolder))
+                {
+                    if (Path.GetExtension(path).ToLower() == ".omap" || Path.GetExtension(path).ToLower() == ".pak")
+                    {
+                        CreateMap(Path.GetFileNameWithoutExtension(path));
+                    }
+                }
+            }
+            
             foreach (string path in Directory.GetDirectories(_packagesFolder))
             {
-                LoadMap(path, true);
+                LoadMap(path, !CML.Instance.Config.IsDebug);
             }
         }
 
@@ -66,6 +77,7 @@ namespace CustomMapsLoader
                 if (File.Exists(omapFile))
                 {
                     info = MapExtension.Extract(omapFile, Path.Combine(folder, key + ".pak"));
+                    File.Delete(omapFile);
                 }
                 else
                 {
@@ -89,7 +101,7 @@ namespace CustomMapsLoader
                 }
                 
                 Map map = info.ToMap(key);
-                File.WriteAllText(Path.Combine(folder, "map.meta"), JsonConvert.SerializeObject(map, Formatting.Indented));
+                MapExtension.StoreMapMeta(folder, key, map);
                 File.WriteAllText(Path.Combine(folder, "client.lua"), GenerateScript(map, info));
                 File.WriteAllText(Path.Combine(folder, "package.json"), GeneratePackage(map.Author, key));
                 if (register) Maps.Add(map);
@@ -153,7 +165,7 @@ namespace CustomMapsLoader
         {
             try
             {
-                Map map = MapExtension.LoadMapMeta<Map>(path, Path.GetDirectoryName(path));
+                Map map = MapExtension.LoadMapMeta<Map>(path, new DirectoryInfo(path).Name);
                 if (map == default)
                 {
                     if(!silently)

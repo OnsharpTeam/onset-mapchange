@@ -17,9 +17,13 @@ namespace CustomMapsLoader
         
         internal static CML Instance { get; private set; }
         
+        internal CmlConfig Config { get; private set; }
+        
         public override void OnStart()
         {
             Instance = this;
+            Config = Data.Config<CmlConfig>();
+            Logger.SetDebug(Config.IsDebug);
             string serverDirectory = Data.Directory.Parent?.Parent?.Parent?.FullName ?? "";
             Default = new MapManager(Logger, Path.Combine(serverDirectory, "maps"), Path.Combine(serverDirectory, "packages"));
         }
@@ -42,6 +46,16 @@ namespace CustomMapsLoader
         public void OnPlayerJoin(Player player)
         {
             Default.CurrentMap?.ChangeFor(player);
+        }
+
+        [ConsoleCommand("listmaps", "Shows all maps currently loaded")]
+        public void OnListMapsCommand()
+        {
+            Logger.Info("Loaded maps:");
+            foreach (Map map in Default.Maps)
+            {
+                Logger.Info(" - {n} ({k}) by {b}", map.Name, map.Key, map.Author);
+            }
         }
         
         [ConsoleCommand("changemap", "Changes the map to the given <key>")]
@@ -83,5 +97,14 @@ namespace CustomMapsLoader
         {
             return Default.CurrentMap?.ToLua();
         }
+
+        [Onsharp.IO.Config("config")]
+        public class CmlConfig
+        {
+            public bool AutoCreateOnStartup { get; set; } = true;
+
+            public bool IsDebug { get; set; } = false;
+        }
+        
     }
 }
